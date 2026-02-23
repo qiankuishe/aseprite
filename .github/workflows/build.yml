@@ -1,5 +1,5 @@
 name: build
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -91,6 +91,15 @@ jobs:
       shell: bash
       run: |
         cd build && ninja
+    - name: Upload Build Artifacts
+      if: ${{ matrix.ui == 'gui' && matrix.build_type == 'RelWithDebInfo' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: aseprite-${{ runner.os }}-${{ matrix.build_type }}
+        path: |
+          build/bin/aseprite*
+          build/bin/data/**
+        retention-days: 30
     - name: Running C++ Tests
       shell: bash
       run: |
