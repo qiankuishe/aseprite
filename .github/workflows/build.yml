@@ -91,6 +91,13 @@ jobs:
       shell: bash
       run: |
         cd build && ninja
+    - name: Copy Missing DLLs (Windows)
+      if: runner.os == 'Windows' && matrix.ui == 'gui'
+      shell: bash
+      run: |
+        # Use ldd to find the exact dynamically linked OpenSSL DLLs and copy them
+        ldd build/bin/aseprite.exe | grep -i libcrypto | awk '{print $3}' | xargs -I {} cp "{}" build/bin/ || true
+        ldd build/bin/aseprite.exe | grep -i libssl | awk '{print $3}' | xargs -I {} cp "{}" build/bin/ || true
     - name: Upload Build Artifacts
       if: ${{ matrix.ui == 'gui' && matrix.build_type == 'RelWithDebInfo' }}
       uses: actions/upload-artifact@v4
